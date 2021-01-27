@@ -1,0 +1,13 @@
+resolver: lts-17.0
+#resolver: nightly-2020-09-28
+# resolver: lts-14.27
+
+packages:
+- .
+
+extra-deps:
+- smtp-mail-0.3.0.0
+
+ghc-options:
+  "$locals": -fwrite-ide-info
+  "$everything": -haddock

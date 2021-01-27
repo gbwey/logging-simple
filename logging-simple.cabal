@@ -1,0 +1,89 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 15197e2b9194c760f89f35442cde247e630726ed155a248029de0687f921d219
+
+name:           logging-simple
+version:        0.1.0.0
+category:       Logging
+homepage:       https://github.com/gbwey/logging-simple#readme
+copyright:      2018 Grant Weyburne
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+
+library
+  exposed-modules:
+      DateTA
+      Logging
+  other-modules:
+      Paths_logging_simple
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wunused-type-patterns -Wredundant-constraints
+  build-depends:
+      base >=4.7 && <5
+    , bytestring
+    , clock
+    , directory
+    , extra
+    , fast-logger
+    , formatting
+    , mime-mail
+    , monad-logger
+    , mtl
+    , smtp-mail
+    , template-haskell
+    , text
+    , th-lift-instances
+    , time
+    , unix-time
+    , unliftio
+    , unliftio-core
+  if os(windows)
+    build-depends:
+        Win32 >=2.2 && <2.9
+  if impl(ghc >= 8.8)
+    ghc-options: -fwrite-ide-info -hiedir=.hie -Widentities
+  default-language: Haskell2010
+
+executable perflog
+  main-is: Main.hs
+  other-modules:
+      Paths_logging_simple
+  hs-source-dirs:
+      app
+  ghc-options: -O2 -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wunused-type-patterns -Wredundant-constraints
+  build-depends:
+      base
+    , bytestring
+    , clock
+    , criterion
+    , directory
+    , extra
+    , fast-logger
+    , formatting
+    , logging-simple
+    , mime-mail
+    , monad-logger
+    , mtl
+    , smtp-mail
+    , template-haskell
+    , text
+    , th-lift-instances
+    , time
+    , unix-time
+    , unliftio
+    , unliftio-core
+  buildable: False
+  if os(windows)
+    build-depends:
+        Win32 >=2.2 && <2.9
+  if impl(ghc >= 8.8)
+    ghc-options: -fwrite-ide-info -hiedir=.hie -Widentities
+  default-language: Haskell2010

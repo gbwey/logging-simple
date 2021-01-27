@@ -1,0 +1,11 @@
+.stack-work/
+corelog.dhall
+stack.yaml.lock
+testdir/
+.ghc.environment.*
+dist-newstyle/
+*.log
+perflog.exe.prof*
+.stack-work-profile/
+.hie/
+stack*.yaml.lock

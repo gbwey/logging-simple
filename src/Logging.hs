@@ -54,7 +54,6 @@ import System.Time.Extra (showDuration)
 import Network.Mail.SMTP (sendMail, simpleMail)
 import Network.Mail.Mime (plainPart)
 import System.Environment (getEnvironment)
-import Control.Monad (zipWithM)
 import Control.Monad.IO.Unlift (MonadUnliftIO)
 import qualified UnliftIO as U
 import Data.String (IsString(fromString))
@@ -62,14 +61,10 @@ import qualified GHC.Generics as G (Generic)
 import Data.Maybe (maybe, fromMaybe)
 import qualified Language.Haskell.TH.Syntax as TH
 import Instances.TH.Lift ()
-import qualified System.Info as SI
-import Data.Char (ord, isSpace, toLower)
+import Data.Char (toLower)
 import qualified Data.List as L
 import System.Directory (doesDirectoryExist, canonicalizePath)
 import GHC.Stack
-import GHC.Conc (getNumCapabilities)
-import Data.Functor (void)
-import Numeric (showHex)
 #ifdef mingw32_HOST_OS
 import qualified System.Win32.Time as W32
 import System.Win32.Time (SYSTEMTIME(..))
@@ -139,15 +134,6 @@ toLogLevel =
      Info -> LevelInfo
      Warn -> LevelWarn
      Error -> LevelError
-
-isWindows :: Bool
-isWindows =  SI.os == "mingw32"
-
-pathSeparator :: Char
-pathSeparator = if isWindows then '\\' else '/'
-
-trim :: String -> String
-trim = dropWhile isSpace . L.dropWhileEnd isSpace
 
 chklogdir :: FilePath -> IO ()
 chklogdir dir = do
@@ -386,16 +372,6 @@ fmtZt =  formatTime defaultTimeLocale "%T"
 fmtZt1 :: UT.UnixTime -> IO B.ByteString
 fmtZt1 =  UT.formatUnixTime "%T"
 
-roundSecondsZT :: ZonedTime -> ZonedTime
-roundSecondsZT zt =
-  zt { zonedTimeToLocalTime = (zonedTimeToLocalTime zt) { localTimeOfDay = (localTimeOfDay (zonedTimeToLocalTime zt)) { todSec = fromIntegral @Int (floor (todSec (localTimeOfDay (zonedTimeToLocalTime zt)))) } } }
-
-getZonedTimeFloor :: MonadIO m => m ZonedTime
-getZonedTimeFloor = liftIO $ roundSecondsZT <$> getZonedTime
-
-localUTC :: ZonedTime -> UTCTime
-localUTC = localTimeToUTC utc . zonedTimeToLocalTime . roundSecondsZT
-
 dispLevel :: LogLevel -> B.ByteString
 dispLevel LevelDebug = mempty
 dispLevel LevelInfo = mempty
@@ -470,113 +446,7 @@ chk :: LLog
     -> LogOpts
 chk deflvl mlvl opts = opts { lScreen = Just (Screen StdOut (fromMaybe deflvl mlvl)) }
 
-hoistEitherM :: MonadIO m
-             => Text
-             -> Either Text a
-             -> m a
-hoistEitherM = hoistEitherMFunc id
-
-hoistEitherMFunc :: MonadIO m
-                 => (e -> Text)
-                 -> Text
-                 -> Either e a
-                 -> m a
-hoistEitherMFunc f txt =
-  either (\e -> U.throwIO $ GBException (txt <> f e)) return
-
 newline :: Text
 newline = "\n"
 
-hexChar :: Char -> String
-hexChar c =
-  let (a,b) = quotRem (ord c) 16
-  in showHex a (showHex b "")
-
-dumpDecHex :: B.ByteString -> IO ()
-dumpDecHex bs = do
-  B.putStrLn bs
-  putStrLn $ "hex=" ++ unwords (map hexChar (B.unpack bs))
-  putStrLn $ "dec=" ++ unwords (map (\c -> [c,'_']) (B.unpack bs))
-
-newtype ThreadPool = ThreadPool { thOverride :: Maybe Int } deriving (Show, Eq, G.Generic)
-
-threadNormal :: ThreadPool
-threadNormal = ThreadPool Nothing
-
-threadNormalOverride :: Int -> ThreadPool
-threadNormalOverride n = ThreadPool (Just n)
-
-newtype NC = NC { unNC :: Int } deriving (Show, Eq, G.Generic)
-
-dumpNumThreads :: ML e m => ThreadPool -> m ()
-dumpNumThreads th = do
-  (NC i,j) <- liftIO (getNumThreads (thOverride th))
-  $logWarn $ "dumpNumThreads: NC=" <> T.pack (show i) <> " " <> T.pack (show j)
-
-getNumThreads :: MonadIO m => Maybe Int -> m (NC, Int)
-getNumThreads mth = do
-  n <- liftIO getNumCapabilities
-  let z = fromMaybe n mth
-  if z < 1 then error $ "getNumThreads: number of threads < 1 z=" ++ show z ++ " n=" ++ show n
-  else return (NC n, z)
-
-data PoolStrategy =
-     PoolUnliftIO
-   | PoolCustom
-   deriving (Show, Eq, G.Generic)
-
-threadedForM_ :: ML e m
-              => PoolStrategy
-              -> ThreadPool
-              -> [a]
-              -> (Int -> a -> m b)
-              -> m ()
-threadedForM_ pl th amb = void . threadedForM pl th amb
-
-threadedForM :: ML e m
-             => PoolStrategy
-             -> ThreadPool
-             -> [a]
-             -> (Int -> a -> m b)
-             -> m [(Int,b)]
-threadedForM _ _ [] _ = $logWarn "threadedForM: nothing to do!" >> return []
-threadedForM pl th@ThreadPool {..} xs act = do
-  (NC n,ov) <- liftIO $ getNumThreads thOverride
-  when (length xs < ov) $ $logWarn $ "threadedForM: more threads than tasks!! tasks=" <> T.pack (show (length xs)) <> " threads=" <> T.pack (show ov)
-  if ov==1
-  then timeCommand ("threadedForM UNTHREADED Capabilities=" <> T.pack (show n) <> " using " <> T.pack (show ov)) (zip [1..] <$> zipWithM act [1..] xs)
-  else timeCommand ("threadedForM Capabilities=" <> T.pack (show n) <> " using " <> T.pack (show ov) <> " " <> T.pack (show pl) <> " " <> T.pack (show th)) $
-          case pl of
-            PoolUnliftIO -> U.pooledMapConcurrentlyN ov (\(i,j) -> (i,) <$> act i j) (zip [1::Int ..] xs)
-            PoolCustom -> concurrentlyLimited ov (zipWith (\i j -> (i,\() -> act i j)) [1..] xs)
-
--- used bounded threads: seems to make no difference: we might be able to use more threads than logical processors using PoolUnliftIO
-concurrentlyLimited :: ML e m => Int -> [(Int, () -> m a)] -> m [(Int, a)]
-concurrentlyLimited n tasks = concurrentlyLimited' n tasks [] []
-
-concurrentlyLimited' :: ML e m
-                     => Int
-                     -> [(Int, () -> m a)]
-                     -> [(Int, U.Async (Int, a))]
-                     -> [(Int, a)]
-                     -> m [(Int, a)]
-concurrentlyLimited' _ [] [] results = do
-  $logInfo ("concurrentlyLimited' ended length results=" <> T.pack (show (length results)) <> " results=" <> T.pack (show (map fst results)))
-  return $ L.sortOn fst results
-concurrentlyLimited' 0 todo running results = do
-    $logInfo ("concurrentlyLimited' before waitAny: FULL: counters: todo=" <> T.pack (show (length todo)) <> ", running=" <> T.pack (show (length running)) <> " done=" <> T.pack (show (length results)) <> " | running=" <> T.pack (show (map fst running)) <> " done=" <> T.pack (show (map fst results)))
-    (task, newResult) <- U.waitAny $ map snd running
-    $logInfo ("concurrentlyLimited' after waitAny: task is freed up id=" <> T.pack (show (fst newResult)) <> " counters: todo=" <> T.pack (show (length todo)) <> ", running=" <> T.pack (show (length running)) <> " done=" <> T.pack (show (length results)) <> " | running=" <> T.pack (show (map fst running)) <> " done=" <> T.pack (show (map fst results)))
-    let running' = L.delete (fst newResult,task) running
-    unless (length running -1 == length running') $ do
-       let msg = "concurrentlyLimited' programmer error: couldnt find " <> T.pack (show (fst newResult)) <> " in " <> T.pack (show (map fst running))
-       $logError msg
-       U.throwIO $ GBException msg
-    concurrentlyLimited' 1 todo running' (newResult:results)
-concurrentlyLimited' _ [] running results = concurrentlyLimited' 0 [] running results
-concurrentlyLimited' n ((i, task):todo) running results = do
-    $logInfo ("concurrentlyLimited' " <> T.pack (show n) <> " available: scheduling task i=" <> T.pack (show i) <> " counters: todo=" <> T.pack (show (length todo)) <> ", running=" <> T.pack (show (length running)) <> " done=" <> T.pack (show (length results)) <> " | running=" <> T.pack (show (map fst running)) <> " done=" <> T.pack (show (map fst results)))
-    -- make sure this is a bounded thread so it doesnt interfere with ghc
-    t <- U.asyncBound $ (i,) <$> task () -- extra parameter () to make lazy else will have started running before we got here! asyncBound so uses a real thread else resource disposed issues
-    concurrentlyLimited' (n-1) todo ((i,t):running) results
 

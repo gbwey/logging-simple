@@ -1,5 +1,4 @@
 .stack-work/
-corelog.dhall
 stack.yaml.lock
 testdir/
 .ghc.environment.*

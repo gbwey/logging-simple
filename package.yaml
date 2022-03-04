@@ -1,3 +1,6 @@
+# HaskellNet had a last commit in dec 2020! apparently not maintained so stay with smtp-mail
+# a lot of the smtp-mail code is based on HaskellNet!
+# https://github.com/UnkindPartition/ansi-terminal/issues/114
 name:                logging-simple
 version:             0.1.0.0
 #synopsis:
@@ -12,14 +15,18 @@ extra-source-files:
 dependencies:
   - base >= 4.7 && < 5
   - bytestring
+  - baseutils
   - clock
+  - coreutils
+  - dhall >= 1.32.0
   - directory
-  - extra
+  - docutils
   - fast-logger
-  - formatting
   - mime-mail
   - monad-logger
   - mtl
+  - pretty-simple
+  - prettyprinter
   - smtp-mail
   - text
   - time
@@ -42,13 +49,11 @@ library:
   - -Wpartial-fields
   - -Wunused-type-patterns
   - -Wredundant-constraints
-  when:
-   - condition: impl(ghc >= 8.8)
-     ghc-options:
-     - -fwrite-ide-info
-     - -hiedir=.hie
-     - -Widentities
-
+  - -Wsimplifiable-class-constraints
+  - -Wmonomorphism-restriction
+  - -Wmissing-deriving-strategies
+  - -Wmissing-local-signatures
+  - -Widentities
 executables:
   perflog:
     buildable: false
@@ -64,14 +69,33 @@ executables:
     - -Wpartial-fields
     - -Wunused-type-patterns
     - -Wredundant-constraints
-    when:
-       condition: impl(ghc >= 8.8)
-       ghc-options:
-       - -fwrite-ide-info
-       - -hiedir=.hie
-       - -Widentities
+    - -Wmissing-deriving-strategies
+    - -Widentities
+    - -Wno-missing-local-signatures
     dependencies:
     - base
     - logging-simple
     - criterion
 
+tests:
+  logging-simple-test:
+    main:                Main.hs
+    source-dirs:
+    - test
+    ghc-options:
+    - -Wall
+    - -Wcompat
+    - -Wincomplete-record-updates
+    - -Wincomplete-uni-patterns
+    - -Wpartial-fields
+    - -Wunused-type-patterns
+    - -Wredundant-constraints
+    - -Wmissing-deriving-strategies
+    - -Widentities
+    dependencies:
+    - base
+    - logging-simple
+    - generic-lens
+    - lens
+    - tasty
+    - tasty-hunit

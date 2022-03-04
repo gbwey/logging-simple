@@ -1,0 +1,1 @@
+- arguments: [--cpp-define=mingw32_HOST_OS]

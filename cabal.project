@@ -1,0 +1,3 @@
+packages: *.cabal ../{baseutils,coreutils,docutils}
+
+tests: True

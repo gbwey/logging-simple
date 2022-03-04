@@ -1,3 +1,5 @@
+.vscode/
+corelog.dhall
 .stack-work/
 stack.yaml.lock
 testdir/
@@ -5,6 +7,8 @@ testdir/
 dist-newstyle/
 *.log
 perflog.exe.prof*
-.stack-work-profile/
+.stack-work-profiling/
 .hie/
 stack*.yaml.lock
+*.bundle
+stan.html

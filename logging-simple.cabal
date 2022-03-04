@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 15197e2b9194c760f89f35442cde247e630726ed155a248029de0687f921d219
+-- hash: 7b3a67ab6abfd6de1ff121fac4f309cb57d91a7eee056505c1670d2c70bffe9e
 
 name:           logging-simple
 version:        0.1.0.0
@@ -25,18 +25,22 @@ library
       Paths_logging_simple
   hs-source-dirs:
       src
-  ghc-options: -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wunused-type-patterns -Wredundant-constraints
+  ghc-options: -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wunused-type-patterns -Wredundant-constraints -Wsimplifiable-class-constraints -Wmonomorphism-restriction -Wmissing-deriving-strategies -Wmissing-local-signatures -Widentities
   build-depends:
       base >=4.7 && <5
+    , baseutils
     , bytestring
     , clock
+    , coreutils
+    , dhall >=1.32.0
     , directory
-    , extra
+    , docutils
     , fast-logger
-    , formatting
     , mime-mail
     , monad-logger
     , mtl
+    , pretty-simple
+    , prettyprinter
     , smtp-mail
     , template-haskell
     , text
@@ -48,8 +52,6 @@ library
   if os(windows)
     build-depends:
         Win32 >=2.2 && <2.9
-  if impl(ghc >= 8.8)
-    ghc-options: -fwrite-ide-info -hiedir=.hie -Widentities
   default-language: Haskell2010
 
 executable perflog
@@ -58,20 +60,24 @@ executable perflog
       Paths_logging_simple
   hs-source-dirs:
       app
-  ghc-options: -O2 -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wunused-type-patterns -Wredundant-constraints
+  ghc-options: -O2 -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wunused-type-patterns -Wredundant-constraints -Wmissing-deriving-strategies -Widentities -Wno-missing-local-signatures
   build-depends:
       base
+    , baseutils
     , bytestring
     , clock
+    , coreutils
     , criterion
+    , dhall >=1.32.0
     , directory
-    , extra
+    , docutils
     , fast-logger
-    , formatting
     , logging-simple
     , mime-mail
     , monad-logger
     , mtl
+    , pretty-simple
+    , prettyprinter
     , smtp-mail
     , template-haskell
     , text
@@ -84,6 +90,45 @@ executable perflog
   if os(windows)
     build-depends:
         Win32 >=2.2 && <2.9
-  if impl(ghc >= 8.8)
-    ghc-options: -fwrite-ide-info -hiedir=.hie -Widentities
+  default-language: Haskell2010
+
+test-suite logging-simple-test
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  other-modules:
+      Paths_logging_simple
+  hs-source-dirs:
+      test
+  ghc-options: -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wunused-type-patterns -Wredundant-constraints -Wmissing-deriving-strategies -Widentities
+  build-depends:
+      base
+    , baseutils
+    , bytestring
+    , clock
+    , coreutils
+    , dhall >=1.32.0
+    , directory
+    , docutils
+    , fast-logger
+    , generic-lens
+    , lens
+    , logging-simple
+    , mime-mail
+    , monad-logger
+    , mtl
+    , pretty-simple
+    , prettyprinter
+    , smtp-mail
+    , tasty
+    , tasty-hunit
+    , template-haskell
+    , text
+    , th-lift-instances
+    , time
+    , unix-time
+    , unliftio
+    , unliftio-core
+  if os(windows)
+    build-depends:
+        Win32 >=2.2 && <2.9
   default-language: Haskell2010

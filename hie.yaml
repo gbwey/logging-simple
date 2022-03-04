@@ -1,0 +1,13 @@
+cradle:
+  stack:
+    - path: "./src"
+      component: "logging-simple:lib"
+
+    - path: "./app/Main.hs"
+      component: "logging-simple:exe:perflog"
+
+    - path: "./test"
+      component: "logging-simple:test:logging-simple-test"
+      
+    - path: "./app/Paths_logging_simple.hs"
+      component: "logging-simple:exe:perflog"

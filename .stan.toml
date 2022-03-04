@@ -1,0 +1,9 @@
+[[remove]]
+directory = "test\\"
+
+# big tuples
+[[check]]
+type = "Exclude"
+id = "STAN-0302"
+file = "src\\Logging.hs" 
+

@@ -5,9 +5,9 @@ packages:
 
 extra-deps:
 - ../baseutils
-- ../coreutils
 - ../docutils
+- ../pos
+- ../primus
+# - pos-0.2.0.0
+# - primus-0.2.0.0
 
-#ghc-options:
-#  "$locals": -fwrite-ide-info
-#  "$everything": -haddock

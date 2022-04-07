@@ -1,3 +1,4 @@
-packages: *.cabal ../{baseutils,coreutils,docutils}
+packages: *.cabal ../{baseutils,pos,primus,docutils}
+-- packages: *.cabal ../{baseutils,docutils}
 
 tests: True

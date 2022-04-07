@@ -91,7 +91,8 @@ import DocUtils.Doc
 import DocUtils.Time
 import GHC.Natural
 import Prettyprinter
-import Utils.Error (normalError)
+import Primus.Error (normalError)
+import Primus.Extra ((.@))
 
 {- | 'ML' has the minimum set of constraints for running sql commands in sqlhandler-odbc
  use MonadReader e to customise the environment
@@ -420,7 +421,7 @@ simpleMail from to cc bcc subject parts =
 
 -- | used for logging start and end time of a job but ignore the returned duration
 timeCommand :: ML e m => Text -> m a -> m a
-timeCommand = (fmap fst .) . timeCommand'
+timeCommand = fmap fst .@ timeCommand'
 
 -- | used for logging start and end time of a job
 timeCommandDiff :: ML e m => Text -> m a -> m (a, Text)

@@ -9,32 +9,31 @@ homepage:            https://github.com/gbwey/logging-simple#readme
 license:             BSD3
 copyright:           2018 Grant Weyburne
 category:            Logging
-extra-source-files:
-- README.md
 
 dependencies:
-  - base >= 4.7 && < 5
-  - bytestring
-  - baseutils
-  - clock
-  - coreutils
-  - dhall >= 1.32.0
-  - directory
-  - docutils
-  - fast-logger
-  - mime-mail
-  - monad-logger
-  - mtl
-  - pretty-simple
-  - prettyprinter
-  - smtp-mail
-  - text
-  - time
-  - template-haskell
-  - th-lift-instances
-  - unix-time
-  - unliftio
-  - unliftio-core
+- base >= 4.7 && < 5
+- bytestring
+- baseutils
+- clock
+- pos >= 0.2.0.0
+- primus >= 0.2.0.0
+- dhall >= 1.32.0
+- directory
+- docutils
+- fast-logger
+- mime-mail
+- monad-logger
+- mtl
+- pretty-simple
+- prettyprinter
+- smtp-mail
+- text
+- time
+- template-haskell
+- th-lift-instances
+- unix-time
+- unliftio
+- unliftio-core
 when:
     - condition: os(windows)
       dependencies: Win32 >= 2.2 && < 2.9

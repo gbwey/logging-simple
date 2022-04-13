@@ -91,8 +91,7 @@ import DocUtils.Doc
 import DocUtils.Time
 import GHC.Natural
 import Prettyprinter
-import Primus.Error (normalError)
-import Primus.Extra ((.@))
+import Primus.Error (normalError, (.@))
 
 {- | 'ML' has the minimum set of constraints for running sql commands in sqlhandler-odbc
  use MonadReader e to customise the environment

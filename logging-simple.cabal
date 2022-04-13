@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b452e2ba6f85e944cdc2672a6ac5b342331bfe72631a00608f69d00b2c78fba1
+-- hash: 699bde49f26e1e87532a9f77b890916bd79f001d243e917ddb994a3c1dc6928b
 
 name:           logging-simple
 version:        0.1.0.0
@@ -36,10 +36,10 @@ library
     , mime-mail
     , monad-logger
     , mtl
-    , pos >=0.2.0.0
+    , pos >=0.3.0.0
     , pretty-simple
     , prettyprinter
-    , primus >=0.2.0.0
+    , primus >=0.3.0.0
     , smtp-mail
     , template-haskell
     , text
@@ -74,10 +74,10 @@ executable perflog
     , mime-mail
     , monad-logger
     , mtl
-    , pos >=0.2.0.0
+    , pos >=0.3.0.0
     , pretty-simple
     , prettyprinter
-    , primus >=0.2.0.0
+    , primus >=0.3.0.0
     , smtp-mail
     , template-haskell
     , text
@@ -115,10 +115,10 @@ test-suite logging-simple-test
     , mime-mail
     , monad-logger
     , mtl
-    , pos >=0.2.0.0
+    , pos >=0.3.0.0
     , pretty-simple
     , prettyprinter
-    , primus >=0.2.0.0
+    , primus >=0.3.0.0
     , smtp-mail
     , tasty
     , tasty-hunit
